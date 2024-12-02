@@ -17,7 +17,8 @@ const postSchema = new mongoose.Schema({
     },
      desc:{
         type:String,
-        required:false
+        required:false,
+        default: "add description"
     }
 },
  { timestamps: true, versionKey: false }
