@@ -21,7 +21,7 @@ app.use(validateRequestNetwork)
 
 
 app.get('/',(req,res)=>{
-     res.json('welcome to our app')
+     res.send('welcome to our app')
 })    
     
 function validateRequestNetwork(req,res,next) {

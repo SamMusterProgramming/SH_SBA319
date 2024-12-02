@@ -15,7 +15,7 @@ route.route('/')
    .get(async(req,res)=>{ // get all users
      const users = await userModel.find({}).limit(20)
      if(!users) return res.json({error:"users list is empty"})
-     res.json(users)
+     res.json(users).status(200)   
    })
    .post(validateUserRegistration,async(req,res)=> {  // add or register user
       const user = req.body
@@ -74,6 +74,24 @@ function isAuthenticated (req, res, next) {
     else res.redirect('/')
 }
 
+//***********************************************POSTS********************************** */
 
+
+route.route('/posts')
+     .get(async(req,res)=>{
+       const posts = await post
+     })
+     .post(validatePost,async(req,res)=>{
+      console.log(req.body)
+       const post = req.body
+       const newPost = new postModel(post)
+       await newPost.save()
+       return res.json(newPost).status(201)
+     })
+function validatePost(req,res,next) {
+      if(!req.body.id || !req.body.user_id || !req.body.image_url)
+         return res.status(404).json({error:"invalid entry"}) 
+      next()
+  }
 
 module.exports = route; 
