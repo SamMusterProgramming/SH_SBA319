@@ -2,12 +2,21 @@ const mongoose = require('mongoose')
 const validator = require('validator');
 
 const userSchema = new mongoose.Schema({
-     id :{
-        type:Number,
-        min: 0,
-        require:true,
-        unique: true
-   },
+    id:{
+       type:Number,
+       min:0,
+       max:100000,
+       required:true, 
+       unique:true
+    },
+     name:{
+        type:String,
+     },
+     profile_img:{
+        type:String,
+        required:false,
+        default:"/static/materials/avatar.avif"
+     },
      email:{
         type:String,
         required:true,
@@ -16,7 +25,7 @@ const userSchema = new mongoose.Schema({
             validator: validator.isEmail,
             message: 'Invalid email format'
         }   
-    },
+     },   
      password: {
         type: String,
         required: true
@@ -24,11 +33,11 @@ const userSchema = new mongoose.Schema({
      username :{
         type:String,
         required:true,
-  }
-},
- { versionKey: false }
+     }
+   },
+    { timestamps: true , versionKey: false }
  )
-userSchema.index({id:1});
+ userSchema.index({id:1})
 userSchema.index({email:1});
 userSchema.index({password:1})
 userSchema.index({email:1,password:1});

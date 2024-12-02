@@ -6,6 +6,7 @@ const connectDB = require('./db.js')
 require('dotenv').config()
 const userModel = require('./models/users.js')
 const userRoute = require('./routes/userRoute.js')
+const postRoute = require('./routes/postRoute.js')
 
 const urlencodedParser = bodyParser.urlencoded({ extended: false })
 const PORT = process.env.PORT
@@ -17,6 +18,7 @@ app.use(urlencodedParser)
 app.use('/static', express.static('public'))
 app.use(express.json())
 app.use('/users',userRoute)
+app.use('/posts',postRoute)
 app.use(validateRequestNetwork)
 
 
