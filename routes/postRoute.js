@@ -31,13 +31,13 @@ route.route('/')
     .post(validatePostData,async(req,res)=>{ 
         const comment =  new commentModel(
                {
-                user_id:post.user_id,
-                post_id:post.id, 
+                user_id:req.body.user_id,
+                post_id:req.body.id, 
                 content:[{source_id:0,comment:"I am your Admin, Welcome"}] 
               })
         await comment.save()
         const post = req.body
-        post.comments.push(comment.content[0]) // i created and initialised template comment for the new post
+        post["comments"] = [comment.content[0]] // i created and initialised template comment for the new post
         const newPost = new postModel(post)
         if(! newPost) return res.json({error:"can't save Post"})
         await newPost.save() 
@@ -137,18 +137,18 @@ route.route('/user/post/:id')
  //req.body will contain the user who comments and a content of the comment
 route.patch('/comments/:id',async(req,res)=>{
     const query = { user_id:Number(req.params.id) ,post_id:Number(req.query.post_id)}
-    console.log(query)
+    if(!req.body.source_id || !req.body.content) 
+        return res.status(404).json({error:"Invalid request , make source you send source_id and content"})
     const comment = req.body; // has source id (the user who commented and content)
     const post = await postModel.findOne({user_id:req.params.id,id:req.query.post_id})
     if (!post) return res.status(404).send('Post not found');
     const newComment = await commentModel.findOneAndUpdate(
-        query,
+        query,  
         {
             $push: { content : comment }
          },
          { new:true } 
-        )
-    console.log(newComment)    
+        )   
     post.comments.push(comment) 
     await post.save();
     res.json(post).status(201) 
