@@ -1,15 +1,21 @@
 const express = require('express')
 const postModel = require('../models/posts')
 const {ObjectId} = require('mongodb')
+const commentModel = require('../models/comments')
 const data = require('../utulities/data')
 
 
 route = express.Router();
 
 route.get('/seed',async(req,res)=>{
-    postModel.collection.drop() // delete the collection document
+    postModel.collection.drop() // delete the collection document and inialise it with prototype data.js
+    commentModel.collection.drop() // same here for comments
     data.posts.forEach(async(post) => {
-      await new postModel(post).save()
+      const comment =  new commentModel({user_id:post.user_id,post_id:post.id, content:[{source_id:0,comment:"I am your Admin, Welcome"}] })
+      await comment.save()
+      const newPost =  new postModel(post)
+      newPost.comments.push(comment.content[0])
+      await newPost.save()
     })
     const posts = await postModel.find({}).limit(20)
     if(!posts) return res.json({error:"posts list is empty"})
@@ -23,17 +29,27 @@ route.route('/')
         res.json(posts).status(200)
     })
     .post(validatePostData,async(req,res)=>{ 
+        const comment =  new commentModel(
+               {
+                user_id:post.user_id,
+                post_id:post.id, 
+                content:[{source_id:0,comment:"I am your Admin, Welcome"}] 
+              })
+        await comment.save()
         const post = req.body
+        post.comments.push(comment.content[0]) // i created and initialised template comment for the new post
         const newPost = new postModel(post)
         if(! newPost) return res.json({error:"can't save Post"})
         await newPost.save() 
         res.json(newPost)  
     })
+
 async function validatePostData(req,res,next) {
     if(!req.body.id || !req.body.user_id)
        return res.status(404).json({error:"invalid data"}) // we don't want to save post with an existing id
     const post = await postModel.findOne({id:req.body.id})
-    if(post) return res.status(404).json({error:"invalid ID"})
+    if(post) return res.status(404).json({error:"ID exist or invalid"})
+
     next()
 }  
 
@@ -51,18 +67,93 @@ route.route('/post/:id')
         if(!post) return res.json({error:"posts does't exist"}).status(404)
         res.json(post).status(200)
       })
-     .patch(validateMongoObjectId,async(req,res)=>{ // we update the entire post , id, user_id ...
-        if(!req.body.id || !req.body.user_id) return res.status(404).json({error:"invalid data"}) 
-        if(await postModel.findOne({id:req.body.id,user_id:req.body.user_id}))
-            return res.status(404).json({error:"can't update post with id and user_id that has been already in use"}) 
+     .patch(validateMongoObjectId,async(req,res)=>{ // we update the entire post ,  user_id ,desc , imageurl ...
+        if(req.body.id) return res.status(404).json({error:"can't update post ID forbidden"})
+        if(!req.body.user_id) return res.status(404).json({error:"invalid data"}) 
         const _id = req.params.id;
-        const post = await postModel.findByIdAndDelete(_id, req.body)
+        const post = await postModel.findByIdAndUpdate(
+              _id,
+               req.body,
+               { new: true } 
+               )
+        if(!post) return res.json({error:"posts does't exist"}).status(404)
+        res.json(post).status(200)
      })
 // middleware to validate mongo objectId _id
 function validateMongoObjectId(req,res,next) {
     if (!ObjectId.isValid(req.params.id)) return res.status(404).json({Error:"error in request ID"});
     next()
     }    
+
+//access and manages all posts of user X , user_id as a params
+
+route.route('/user/:id')
+     .get(async(req,res)=>{
+       const query = {user_id:req.params.id};
+       const posts = await postModel.find(query)
+       if(posts.length == 0) return res.json({error:"user does't have posts yet"}).status(404)
+       res.json(posts).status(200)
+     })
+     .delete(async(req,res)=>{
+        const query = {user_id:req.params.id};
+        const posts = await postModel.deleteMany(query,{ new: true } )
+        if(posts.length == 0 ) return res.json({error:"user does't have posts yet"}).status(404)
+        res.json(posts).status(200)
+      })
+     
+
+// get , delete and update a user post by user_id as paramas and post id as a query
+
+route.route('/user/post/:id')
+     .get(async(req,res)=>{
+        const query = {user_id:req.params.id,id:req.query.id}
+        const post = await postModel.findOne(query)
+        if(!post) return res.json({error:"can't find the post"}).status(404) 
+        res.status(200).json(post)
+     })
+     .delete(async(req,res)=>{
+        const query = {user_id:req.params.id,id:req.query.id}
+        const post = await postModel.deleteOne(
+            query,
+            { new: true } 
+            )
+        if(!post) return res.json({error:"can't find the post"}).status(404) 
+        res.status(200).json(post)
+     })
+     .patch(async(req,res)=>{
+        if(req.body.id || req.body.user_id) return res.json({error:"can't modify Ids, forbidden"}).status(404)
+        const query = {user_id:req.params.id,id:req.query.id}
+        const post = await postModel.updateOne(
+            query,
+            req.body,
+            { new: true } 
+            )
+        if(!post) return res.json({error:"can't find the post"}).status(404) 
+        res.status(200).json(post)
+     })
+
+
+ // add comment to post from user X  , paramas refer to user the owner of the post
+ //req.body will contain the user who comments and a content of the comment
+route.patch('/comments/:id',async(req,res)=>{
+    const query = { user_id:Number(req.params.id) ,post_id:Number(req.query.post_id)}
+    console.log(query)
+    const comment = req.body; // has source id (the user who commented and content)
+    const post = await postModel.findOne({user_id:req.params.id,id:req.query.post_id})
+    if (!post) return res.status(404).send('Post not found');
+    const newComment = await commentModel.findOneAndUpdate(
+        query,
+        {
+            $push: { content : comment }
+         },
+         { new:true } 
+        )
+    console.log(newComment)    
+    post.comments.push(comment) 
+    await post.save();
+    res.json(post).status(201) 
+})   
+
 
 
 module.exports = route; 

@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 const validator = require('validator');
 
+
 const postSchema = new mongoose.Schema({ 
     id:{
        type:Number,
@@ -19,7 +20,8 @@ const postSchema = new mongoose.Schema({
         type:String,
         required:false,
         default: "add description"
-    }
+    },
+     comments: [] // to store comment of a user in an array of object for the post 
 },
  { timestamps: true, versionKey: false }
  )

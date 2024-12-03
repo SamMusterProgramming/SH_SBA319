@@ -34,8 +34,53 @@ const posts =[
         user_id:1,
         image_url:"static/materials/samir.jpeg",
         desc: "my second post , Hello world"
-     }
-
+     },
+    {
+      id : 3,
+      user_id : 1,
+      image_url : "static/materials/samir.jpeg",
+      desc : "my first post , Hello"
+    },
+    {
+      id : 4,
+      user_id : 2,
+      image_url : "static/materials/samir.jpeg",
+      desc : "feeling great , Hello"
+    },
+    ,
+    {
+      id : 5,
+      user_id :2,
+      image_url : "static/materials/samir.jpeg",
+      desc : "what's going on friends"
+    },
+    {
+      id : 6,
+      user_id : 3,
+      image_url : "static/materials/samir.jpeg",
+      desc : "my first post , Hello"
+    },
+    {
+      id : 7,
+      user_id : 2,
+      image_url : "static/materials/samir.jpeg",
+      desc : "feeling great , Hello"
+    },
+    ,
+    {
+      id : 8,
+      user_id :3,
+      image_url : "static/materials/samir.jpeg",
+      desc : "what's going on friends"
+    }
 ]
+
+const comments =[ 
+    {
+          
+    }
+]
+
+
 
 module.exports = { users ,posts };
