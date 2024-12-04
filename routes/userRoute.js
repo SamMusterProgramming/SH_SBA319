@@ -79,7 +79,7 @@ function validateMongoObjectId(req,res,next) {
 //I use this route to log in a user with session if successfully Authenticated 
 route.get('/login', isAuthenticated, async (req, res) => {
     if(!req.session.user) res.status(400).json("not looged in n")
-    res.status(200).json("successfully logged in ")
+    res.status(200).json(req.session.user)
 })
 
 route.post('/login', async(req, res)=>{
@@ -91,10 +91,10 @@ route.post('/login', async(req, res)=>{
     if(!user) return res.json({error:"user not found "}).status(404)
     req.session.regenerate(function (err) {
         if (err) return res.send('errrooorr')
-        req.session.user = user
+        req.session.user = user  
         req.session.save(function (err) {
            if (err) return res.send('errrooorr')
-           res.redirect('/users/login')
+           res.status(200).json(user)
       })
     })
 })
