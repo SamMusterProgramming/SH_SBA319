@@ -29,7 +29,7 @@ route.route('/')
         res.json(posts).status(200)
     })
     .post(validatePostData,async(req,res)=>{ 
-        const comment =  new commentModel(
+        const comment =  new commentModel(// for each post , I create a welcome message from the admin 
                {
                 user_id:req.body.user_id,
                 post_id:req.body.id, 
@@ -39,16 +39,15 @@ route.route('/')
         const post = req.body
         post["comments"] = [comment.content[0]] // i created and initialised template comment for the new post
         const newPost = new postModel(post)
-        if(! newPost) return res.json({error:"can't save Post"})
+        if(! newPost) return res.json({error:"can't create the Post"})
         await newPost.save() 
         res.json(newPost)  
     })
-
 async function validatePostData(req,res,next) {
     if(!req.body.id || !req.body.user_id)
-       return res.status(404).json({error:"invalid data"}) // we don't want to save post with an existing id
+       return res.status(404).json({error:"invalid data"}) // we don't want to save post without required fields id and user_id
     const post = await postModel.findOne({id:req.body.id})
-    if(post) return res.status(404).json({error:"ID exist or invalid"})
+       if(post) return res.status(404).json({error:"ID exist or invalid"}) // id is unique for each post
 
     next()
 }  
@@ -79,11 +78,6 @@ route.route('/post/:id')
         if(!post) return res.json({error:"posts does't exist"}).status(404)
         res.json(post).status(200)
      })
-// middleware to validate mongo objectId _id
-function validateMongoObjectId(req,res,next) {
-    if (!ObjectId.isValid(req.params.id)) return res.status(404).json({Error:"error in request ID"});
-    next()
-    }    
 
 //access and manages all posts of user X , user_id as a params
 
@@ -134,12 +128,12 @@ route.route('/user/post/:id')
 
 
  // add comment to post from user X  , paramas refer to user the owner of the post
- //req.body will contain the user who comments and a content of the comment
-route.patch('/comments/:id',async(req,res)=>{
+ //req.body will contain the user who comments source_id and a content of the comment
+route.patch('/comments/add/:id',async(req,res)=>{
     const query = { user_id:Number(req.params.id) ,post_id:Number(req.query.post_id)}
     if(!req.body.source_id || !req.body.content) 
-        return res.status(404).json({error:"Invalid request , make source you send source_id and content"})
-    const comment = req.body; // has source id (the user who commented and content)
+        return res.status(404).json({error:"Invalid request , make sure you send source_id and content"})
+    const comment = req.body; //must have source id (the user who commented with comment content)
     const post = await postModel.findOne({user_id:req.params.id,id:req.query.post_id})
     if (!post) return res.status(404).send('Post not found');
     const newComment = await commentModel.findOneAndUpdate(
@@ -154,6 +148,31 @@ route.patch('/comments/:id',async(req,res)=>{
     res.json(post).status(201) 
 })   
 
+// get all comments of a post 
+route.get('/comments/all/:id',validateMongoObjectId,async(req,res)=> {
+   const _id = req.params.id ; 
+   const post = await postModel.findById(_id)
+   if (!post) return res.status(404).send('Post not found');
+   res.json(post.comments) 
+})
+//delete all comments of post
+route.delete('/comments/delete/:id',validateMongoObjectId,async(req,res)=> {
+    const _id = req.params.id ; 
+    const post = await postModel.findByIdAndUpdate(
+        _id,
+        { $set: { comments: [] } },
+      { new: true }
+        )
+    if (!post) return res.status(404).send('Post not found');
+    res.json(post) 
+ })
+
+
+// middleware to validate mongo objectId _id
+function validateMongoObjectId(req,res,next) {
+    if (!ObjectId.isValid(req.params.id)) return res.status(404).json({Error:"error in request ID"});
+    next()
+}    
 
 
 module.exports = route; 

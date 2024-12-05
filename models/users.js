@@ -15,7 +15,7 @@ const userSchema = new mongoose.Schema({
      profile_img:{
         type:String,
         required:false,
-        default:"/static/materials/avatar.avif"
+        default:"../../assets/1.png"
      },
      email:{
         type:String,
@@ -33,6 +33,18 @@ const userSchema = new mongoose.Schema({
      username :{
         type:String,
         required:true,
+     },
+     city:{
+      type:String,
+      default:"Charlotte"
+     },
+     state:{
+      type:String,
+      default:"North Carolina"
+     },
+     profession:{
+      type:String,
+      default:   "add your profession"
      }
    },
     { timestamps: true , versionKey: false }

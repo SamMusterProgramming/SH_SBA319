@@ -82,12 +82,10 @@ route.get('/login', isAuthenticated, async (req, res) => {
     res.status(200).json(req.session.user)
 })
 
-route.post('/login', async(req, res)=>{
-    console.log(req.body)  
+route.post('/login', async(req, res)=>{ 
     if(!req.body.email || !req.body.password) return res.json({error:"invalid loggin "}).status(404)
     const query = {email:req.body.email,password:req.body.password}
     const user = await userModel.findOne(query)
-    console.log(user)
     if(!user) return res.json({error:"user not found "}).status(404)
     req.session.regenerate(function (err) {
         if (err) return res.send('errrooorr')

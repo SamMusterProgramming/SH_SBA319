@@ -4,20 +4,35 @@ const users =[
     {
             id:1,
             name: "will junior  Smith",
-            profile_img: "/static/materials/avatar.avif",
+            profile_img: "../../assets/1.png",
             email: "johnSmith2020@gmail.com",
             password: "johnsmith",
-            username: "smithJ2024"
-        
+            username: "smithJ2024",
+            city:"Charlotte",
+            state: "North Carolina",
+            profession: "Developper"
     },   
     {
             id:2,
             name: "Samir Haddadi",
-            profile_img: "/static/materials/avatar.avif",
+            profile_img: "../../assets/2.png",
             email: "samcoeur2020@gmail.com",
             password: "samir",
-            username: "samcoeur"
-        
+            username: "samcoeur",
+            city:"Charlotte",
+            state: "North Carolina",
+            profession: "Driver"  
+    },  
+    {
+            id:3,
+            name: "Djamel Haddadi",
+            profile_img: "../../assets/3.png",
+            email: "Djamel-haddadi1990@gmail.com",
+            password: "djamel",
+            username: "djimka",
+            city:"Algiers",
+            state: "Algiers",
+            profession: "Delivery driver"  
     }
 
 ]

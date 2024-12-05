@@ -1,0 +1,34 @@
+.profile {
+  
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: start;
+    text-align: center;
+    height: 98%;
+    width: 30%;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+
+}
+.header {
+    width: 98%;
+    height: 10%;
+    border: 1 solid orange;
+}
+.header img {
+    width: 80%;
+    height: 260px;
+    object-fit: cover;
+}
+
+button {
+    width: 150px;
+    height: 40px;
+    background-color: rgb(20, 152, 218);
+    color: white;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
